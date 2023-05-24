@@ -1,0 +1,197 @@
+# if command -v pyenv 1>/dev/null 2>&1; then
+#   eval "$(pyenv init -)"
+# fi
+
+# AGNOSTER_PROMPT_SEGMENTS+="prompt_end"
+
+alias dir='ls'
+alias afind='ack -S'
+alias jfind='ack -S --java'
+
+alias zo="vim ~/.myzshrc"
+alias zs=". ~/.myzshrc"
+alias dr="cd ~/Dev/rokupay/"
+alias dra="cd ~/Dev/rokupay/aria-gw/"
+alias drb="cd ~/Dev/rokupay/baas/"
+alias dri="cd ~/Dev/rokupay/billing-account/"
+alias drl="cd ~/Dev/rokupay/ledger-service/"
+alias drr="cd ~/Dev/rokupay/rpm/"
+alias dcs="cd ~/Perforce/dmodi_C02ZD6LNLVDQ_channelStore/depot/web/appstore/main"
+
+pfind () {
+	lsof -nP -i4TCP:$1
+}
+
+rebaseprep () {
+    currentbranch=$(git branch --show-current)
+    # git pull
+    git checkout master
+    git pull
+    git checkout $currentbranch
+}
+
+findalias () {
+    zsh -ixc : 2>&1 | grep "alias '$1="
+}
+
+awsprofile () {
+    if [[ "$*" = "prod" ]]
+    then
+        export AWS_PROFILE=RokuPayProd-Dev
+    elif [[ "$*" == "staging" ]]
+    then 
+        export AWS_PROFILE=RokuPayStg-Dev
+    else
+        export AWS_PROFILE=RokuPayQA-DevOps
+    fi
+}
+
+alias gitswitch='git switch -C master origin/master'
+
+alias startkafka='cd ~/Dev/kafka_2.11-0.11.0.3; bin/kafka-server-start.sh config/server.properties; cd -'
+alias zooclient='/usr/local/Cellar/zookeeper/3.4.14/bin/zkCli -server localhost:2181'
+
+# to convert to upper case and lower case
+alias ucase='pbpaste | tr "[a-z]" "[A-Z]" | pbcopy'
+alias lcase='pbpaste | tr "[A-Z]" "[a-z]" | pbcopy'
+
+#bind keys to vi
+bindkey -v
+bindkey '^R' history-incremental-search-backward
+
+#java
+export JAVA_8_HOME=$(/usr/libexec/java_home -v1.8)
+# export JAVA_8_HOME=/Library/Java/JavaVirtualMachines/temurin-8.jdk/Contents/Home
+export JAVA_11_HOME=$(/usr/libexec/java_home -v11)
+# export JAVA_11_HOME=/usr/local/Cellar/openjdk@11/11.0.19/libexec/openjdk.jdk/Contents/Home
+
+alias java8='export JAVA_HOME=$JAVA_8_HOME'
+alias java11='export JAVA_HOME=$JAVA_11_HOME'
+
+# default to Java 11
+java11
+
+alias stafvenv='. ~/Dev/rokupay/test/staftest/venv/bin/activate'
+alias stafvenvd='deactivate nondestructive'
+stafvenv
+# alias python='python3'
+
+# export PATH=$(pyenv root)/shims:~/bin:$PATH
+export PATH=~/bin:$PATH
+# export AWS_PROFILE=RokuPayQA-Dev
+export AWS_PROFILE=RokuPayQA-DevOps
+# export AWS_PROFILE=RokuPayStg-Dev
+#  export AWS_PROFILE=Web-Dev
+# export AWS_DEFAULT_PROFILE=Web-Dev
+# export AWS_PROFILE=rpay-qa_rokupayqa-devops
+# export AWS_PROFILE=RokuPayProd-Dev
+# export AWS_DEFAULT_REGION="us-east-1"
+# export AWS_REGION="us-east-1"
+export AWS_DEFAULT_REGION="us-west-2"
+# export AWS_DEFAULT_REGION="us-west-2"
+export AWS_REGION="us-west-2"
+alias getkeys="getawskeys2 -u $USER -r"
+# alias sshaws="aws --profile RokuPayProd-Dev ssm start-session --target i-050397ae3c406c894"
+# alias sshawsf="aws --profile RokuPayProd-Dev ssm start-session --target i-050397ae3c406c894 --document-name AWS-StartPortForwardingSession --parameters '{\"portNumber\":[\"6789\"], \"localPortNumber\":[\"1080\"]}'"
+alias sshawseast="AWS_REGION=us-east-1 aws --profile RokuPayProd-Dev ssm start-session --target i-0c54766ef37b3250b"
+alias sshawswest="AWS_REGION=us-west-2 aws --profile RokuPayProd-Dev ssm start-session --target i-0d2a5f922b9a2e790"
+alias sshawseastf="AWS_REGION=us-east-1 aws --profile RokuPayProd-Dev ssm start-session --target i-0c54766ef37b3250b --document-name AWS-StartPortForwardingSession --parameters '{\"portNumber\":[\"6789\"], \"localPortNumber\":[\"1080\"]}' --region us-east-1"
+alias sshawswestf="AWS_REGION=us-west-2 aws --profile RokuPayProd-Dev ssm start-session --target i-0d2a5f922b9a2e790 --document-name AWS-StartPortForwardingSession --parameters '{\"portNumber\":[\"6789\"], \"localPortNumber\":[\"1080\"]}' --region us-west-2"
+
+# sock5 command for json response
+s5() {
+    curl -x socks5h://localhost:1080 $@ | jq .
+}
+
+# sock5 command for non json response
+s6() {
+    curl -x socks5h://localhost:1080 $@ 
+}
+
+# export kms to env. Ex mksExpr _global,dpes
+mksExport () {
+    export export NAMESPACES=$1
+    source kms_pull_and_export.sh e1qa-secrets $1
+}
+
+# decrypt secrets
+decryptSecrete() {
+    aws --region us-east-1 --profile RokuPayQA-DevOps kms decrypt --ciphertext-blob fileb://$1 --output text --query Plaintext | base64 --decode
+}
+
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+#[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+alias nodeex='node --experimental-modules'
+nvm use 16
+
+#kafka 
+KAFKA_LOCATOIN=~/Dev/kafka_2.11-0.11.0.3
+KAFKA_BROKER=localhost:9092 
+#KAFKA_BROKER=kafka-bootstrap.qa.cti.roku.com:9092
+ZOOKEEPER_SERVER=localhost:2181 
+kafka_start() {
+  ${KAFKA_LOCATOIN}/bin/kafka-server-start.sh config/server.properties --override delete.topic.enable=true &
+}
+
+zookeeper_start() {
+  ${KAFKA_LOCATOIN}/bin/zookeeper-server-start.sh config/zookeeper.properties &
+}
+
+kafka_consumer() {
+  if [ $# = 0 ]
+    then echo Usage: kafka_consumer topic [partition]
+    elif [ $# = 1 ]
+    then ${KAFKA_LOCATOIN}/bin/kafka-console-consumer.sh --bootstrap-server $KAFKA_BROKER --topic $1 --from-beginning --property print.key=true --property key.separator=,
+    else ${KAFKA_LOCATOIN}/bin/kafka-console-consumer.sh --bootstrap-server $KAFKA_BROKER --topic $1 --from-beginning --property print.key=true --property key.separator=, --partition $2
+  fi
+}
+
+kafka_producer() {
+  if [ $# = 0 ]
+    then echo Usage: kafka_producer topic 
+    else ${KAFKA_LOCATOIN}/bin/kafka-console-producer.sh --broker-list $KAFKA_BROKER --topic $1 --property parse.key=true --property key.separator=,
+  fi
+}
+
+kafka_list() {
+  ${KAFKA_LOCATOIN}/bin/kafka-topics.sh --list --zookeeper $ZOOKEEPER_SERVER
+}
+
+kafka_create() {
+  if [ $# = 0 ]
+    then echo Usage: kafka_create topic [partitions]
+    elif [ $# = 1 ]
+    then ${KAFKA_LOCATOIN}/bin/kafka-topics.sh --create --topic $1 --zookeeper $ZOOKEEPER_SERVER
+    else ${KAFKA_LOCATOIN}/bin/kafka-topics.sh --create --topic $1 --zookeeper $ZOOKEEPER_SERVER --partitions $2 --replication-factor 1
+  fi
+}
+
+kafka_delete(){
+  if [ $# = 0 ]
+    then echo Usage: kafka_delete topic
+    elif [ $# = 1 ]
+    then ${KAFKA_LOCATOIN}/bin/kafka-topics.sh --zookeeper $ZOOKEEPER_SERVER --delete --topic $1
+  fi
+}
+
+kafka_desc() {
+  ${KAFKA_LOCATOIN}/bin/kafka-topics.sh --zookeeper $ZOOKEEPER_SERVER --describe --topic $1
+}
+
+uuid_format() {
+  echo ${1:0:8}-${1:8:4}-${1:12:4}-${1:16:4}-${1:20}
+}
+
+# fd - cd to selected directory
+fd() {
+  local dir
+  dir=$(find ${1:-.} -path '*/\.*' -prune \
+                  -o -type d -print 2> /dev/null | fzf +m) &&
+  cd "$dir"
+}
+
+# fh - search in your command history and execute selected command
+fh() {
+  eval $( ([ -n "$ZSH_NAME" ] && fc -l 1 || history) | fzf +s --tac | sed 's/ *[0-9]* *//')
+}
